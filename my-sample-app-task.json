@@ -1,0 +1,26 @@
+[
+  {
+    "name": "my-sample-app-${env}",
+    "image": "${image}:latest",
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": 80
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/my_sample_app/${env}",
+        "awslogs-region": "${aws_region}",
+        "awslogs-stream-prefix": "web"
+      }
+    },
+    "secrets": [
+      {
+        "name": "MY_SECURE_VALUE",
+        "valueFrom": "arn:aws:ssm:${aws_region}:${aws_account_id}:parameter/my-sample-app/${env}/sample"
+      }
+    ]
+  }
+]
