@@ -8,7 +8,7 @@ resource "aws_alb" "alb" {
   ]
 
   internal                   = false
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 }
 
 resource "aws_alb_target_group" "target" {

@@ -34,12 +34,10 @@ resource "aws_ecs_cluster" "cluster" {
     "FARGATE_SPOT"
   ]
   default_capacity_provider_strategy {
-    base              = 0
     capacity_provider = "FARGATE"
     weight            = var.ecs_cluster.fargate_weight
   }
   default_capacity_provider_strategy {
-    base              = 0
     capacity_provider = "FARGATE_SPOT"
     weight            = var.ecs_cluster.fargate_spot_weight
   }
@@ -134,13 +132,11 @@ resource "aws_ecs_service" "service" {
 
   capacity_provider_strategy {
     capacity_provider = "FARGATE"
-    base              = 0
     weight            = var.ecs_cluster.fargate_weight
   }
 
   capacity_provider_strategy {
     capacity_provider = "FARGATE_SPOT"
-    base              = 0
     weight            = var.ecs_cluster.fargate_spot_weight
   }
 
@@ -173,63 +169,6 @@ resource "aws_ecs_service" "service" {
       capacity_provider_strategy
     ]
   }
-}
-
-resource "aws_cloudwatch_metric_alarm" "out" {
-  alarm_name          = "my-sample-app-${terraform.workspace}-ecs-cpu-gt-75"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "1"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/ECS"
-  period              = "300"
-  statistic           = "Average"
-  threshold           = "75"
-
-  dimensions = {
-    ClusterName = aws_ecs_cluster.cluster.name
-    ServiceName = aws_ecs_service.service.name
-  }
-
-  alarm_actions = [aws_appautoscaling_policy.out.arn]
-}
-
-resource "aws_cloudwatch_metric_alarm" "in" {
-  alarm_name          = "my-sample-app-${terraform.workspace}-ecs-cpu-lt-25"
-  comparison_operator = "LessThanThreshold"
-  evaluation_periods  = "1"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/ECS"
-  period              = "300"
-  statistic           = "Average"
-  threshold           = "25"
-
-  dimensions = {
-    ClusterName = aws_ecs_cluster.cluster.name
-    ServiceName = aws_ecs_service.service.name
-  }
-
-  alarm_actions = [aws_appautoscaling_policy.in.arn]
-}
-
-resource "aws_iam_role" "autoscale" {
-  name = "autoscale"
-  path = "/my-sample-app/${terraform.workspace}/ecs/"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "Autoscale",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "application-autoscaling.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
 }
 
 resource "aws_appautoscaling_target" "ecs" {
@@ -279,3 +218,40 @@ resource "aws_appautoscaling_policy" "in" {
 
   depends_on = [aws_appautoscaling_target.ecs]
 }
+
+resource "aws_cloudwatch_metric_alarm" "out" {
+  alarm_name          = "my-sample-app-${terraform.workspace}-ecs-cpu-gt-75"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "300"
+  statistic           = "Average"
+  threshold           = "75"
+
+  dimensions = {
+    ClusterName = aws_ecs_cluster.cluster.name
+    ServiceName = aws_ecs_service.service.name
+  }
+
+  alarm_actions = [aws_appautoscaling_policy.out.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "in" {
+  alarm_name          = "my-sample-app-${terraform.workspace}-ecs-cpu-lt-25"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "300"
+  statistic           = "Average"
+  threshold           = "25"
+
+  dimensions = {
+    ClusterName = aws_ecs_cluster.cluster.name
+    ServiceName = aws_ecs_service.service.name
+  }
+
+  alarm_actions = [aws_appautoscaling_policy.in.arn]
+}
+
