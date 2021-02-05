@@ -125,10 +125,11 @@ resource "aws_ecs_task_definition" "task" {
 }
 
 resource "aws_ecs_service" "service" {
-  name            = "my-sample-app-${terraform.workspace}"
-  cluster         = aws_ecs_cluster.cluster.id
-  task_definition = aws_ecs_task_definition.task.arn
-  desired_count   = 0
+  name             = "my-sample-app-${terraform.workspace}"
+  cluster          = aws_ecs_cluster.cluster.id
+  task_definition  = aws_ecs_task_definition.task.arn
+  desired_count    = 0
+  platform_version = "1.4.0"
 
   capacity_provider_strategy {
     capacity_provider = "FARGATE"
