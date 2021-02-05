@@ -44,7 +44,7 @@ resource "aws_ecs_cluster" "cluster" {
 }
 
 resource "aws_iam_role" "execution" {
-  name = "execution"
+  name = "my-sample-app-execution-${terraform.workspace}"
   path = "/my-sample-app/${terraform.workspace}/ecs/"
 
   assume_role_policy = <<EOF
